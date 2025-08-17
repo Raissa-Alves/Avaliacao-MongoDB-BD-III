@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Registrar Pedido - Le Restaurant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #ffffff;
+            color: #333;
+            line-height: 1.6;
+            padding-top: 80px;
+        }
+        
+        header {
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin: 0 30px;
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: #555;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        nav ul li a:hover {
+            color: #000;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .form-container {
+            border: 1px solid #ddd;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        h1, h2 {
+            color: #222;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        
+        input, select, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        
+        button {
+            background-color: #222;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #222;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            border-radius: 4px;
+        }
+        
+        .success {
+            background-color: #dff0d8;
+            color: #3c763d;
+        }
+        
+        .error {
+            background-color: #f2dede;
+            color: #a94442;
+        }
+        
+        .item-pedido {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 4px;
+            position: relative;
+        }
+        
+        .item-pedido button {
+            width: auto;
+            padding: 8px 12px;
+            background-color: #f44336;
+        }
+        
+        .item-pedido button:hover {
+            background-color: #d32f2f;
+        }
+        
+        footer {
+            background-color: #222;
+            color: #fff;
+            padding: 30px 20px;
+            text-align: center;
+            margin-top: 50px;
+        }
+        
+        .copyright {
+            color: #777;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="nav-container">
+            <nav>
+                <ul>
+                    <li><a href="/">Home</a></li>
+                    <li><a href="/registrar_pedido">Delivery</a></li>
+                    <li><a href="/reserva_mesa">Reserva</a></li>
+                    <li><a href="/cadastro_cliente">Cadastro cliente</a></li>
+                    <li><a href="/cadastro_cardapio">Cadastro cardapio</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <h1>Registrar Pedido</h1>
+        
+        <div class="form-container">
+            <form id="pedidoForm">
+                <input type="text" name="cliente_id" placeholder="ID do Cliente" required>
+                <div id="itensPedido">
+                    <div class="item-pedido">
+                        <input type="text" name="item_id[]" placeholder="ID do Item" required>
+                        <input type="text" name="item_nome[]" placeholder="Nome do Item" required>
+                        <input type="number" name="quantidade[]" placeholder="Quantidade" min="1" value="1" required>
+                    </div>
+                </div>
+                <button type="button" onclick="adicionarItem()">+ Adicionar Item</button>
+                <select name="pagamento" required>
+                    <option value="">Selecione a forma de pagamento</option>
+                    <option value="Pix">Pix</option>
+                    <option value="cartão">Cartão</option>
+                    <option value="Em espécie">Em espécie</option>
+                    
+                </select>
+                <textarea name="observacoes" placeholder="Observações"></textarea>
+                
+                <button type="submit">Registrar Pedido</button>
+                <div id="pedidoResult" class="result"></div>
+            </form>
+        </div>
+    </div>
+    
+    <footer>
+        <p class="copyright">&copy; 2025 LE RESTAURANT. Todos os direitos reservados.</p>
+    </footer>
+    
+    <script>
+        function adicionarItem() {
+            const div = document.createElement('div');
+            div.className = 'item-pedido';
+            div.innerHTML = `
+                <input type="text" name="item_id[]" placeholder="ID do Item" required>
+                 <input type="text" name="item_nome[]" placeholder="Nome do Item" required>
+                <input type="number" name="quantidade[]" placeholder="Quantidade" min="1" value="1" required>
+                <button type="button" onclick="this.parentNode.remove()">Remover</button>
+            `;
+            document.getElementById('itensPedido').appendChild(div);
+        }
+        
+        document.getElementById('pedidoForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const form = e.target;
+            const formData = {};
+            const resultDiv = document.getElementById('pedidoResult');
+            
+            // Coletar dados do formulário
+            new FormData(form).forEach((value, key) => {
+                // Tratar arrays (como itens do pedido)
+                if (key.includes('[]')) {
+                    const cleanKey = key.replace('[]', '');
+                    if (!formData[cleanKey]) formData[cleanKey] = [];
+                    formData[cleanKey].push(value);
+                } else {
+                    formData[key] = value;
+                }
+            });
+            
+            try {
+                const response = await fetch('/insert/pedido', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    resultDiv.innerHTML = `<div class="success"> Pedido Feito !</div>`;
+                    form.reset();
+                    // Resetar itens do pedido para apenas um item
+                    document.getElementById('itensPedido').innerHTML = `
+                        <div class="item-pedido">
+                            <input type="text" name="item_id[]" placeholder="ID do Item" required>
+                            <input type="number" name="quantidade[]" placeholder="Quantidade" min="1" value="1" required>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<div class="error">Erro: ${result.message || 'Erro desconhecido'}</div>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<div class="error">Erro na conexão: ${error.message}</div>`;
+            }
+        });
+    </script>
+</body>
+</html>
